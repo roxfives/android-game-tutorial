@@ -16,6 +16,9 @@ public class GameplayScene implements Scene {
     private long mGameOverTime;
     private Rect mGameOverRect;
 
+    private OrientationData mOrientationData;
+    private long mFrameTime;
+
     public GameplayScene() {
         this.mPlayer = new RectPlayer(new Rect(100, 100, 200, 200), Color.RED);
         this.mPlayerPoint = new Point(Constants.SCREEN_WIDTH/2, 3 * Constants.SCREEN_HEIGHT/4);
@@ -25,11 +28,47 @@ public class GameplayScene implements Scene {
         this.mGameOverRect = new Rect();
 
         this.mObstacleManager = new ObstacleManager(200, 350, 75, Color.BLACK);
+
+        this.mOrientationData = new OrientationData();
+        mOrientationData.register();
+
+        mFrameTime = System.currentTimeMillis();
     }
 
     @Override
     public void update() {
+        int elapsedTime;
+        float pitch;
+        float roll;
+        float xSpeed;
+        float ySpeed;
+
         if(!mGameOver) {
+            if(mFrameTime < Constants.INIT_TIME) {
+                mFrameTime = Constants.INIT_TIME;
+            }
+
+            elapsedTime = (int) (System.currentTimeMillis() - mFrameTime);
+            mFrameTime = System.currentTimeMillis();
+
+            if(mOrientationData.getOrientation() != null
+                    && mOrientationData.getStartOrientation() != null) {
+                pitch = mOrientationData.getOrientation()[1] - mOrientationData.getStartOrientation()[2];
+                roll = mOrientationData.getOrientation()[2] - mOrientationData.getStartOrientation()[1];
+
+                xSpeed = 2 * roll * Constants.SCREEN_WIDTH/1000f;
+                ySpeed = pitch * Constants.SCREEN_HEIGHT/1000f;
+
+                mPlayerPoint.x += (Math.abs(xSpeed * elapsedTime) > 5)? xSpeed * elapsedTime : 0;
+                mPlayerPoint.y -= (Math.abs(ySpeed * elapsedTime) > 5)? ySpeed * elapsedTime : 0;
+            }
+
+            mPlayerPoint.x = (mPlayerPoint.x < 0)? 0 : mPlayerPoint.x;
+            mPlayerPoint.x = (mPlayerPoint.x > Constants.SCREEN_WIDTH)? Constants.SCREEN_WIDTH : mPlayerPoint.x;
+
+            mPlayerPoint.y = (mPlayerPoint.y < 0)? 0 : mPlayerPoint.y;
+            mPlayerPoint.y = (mPlayerPoint.y > Constants.SCREEN_HEIGHT)? Constants.SCREEN_HEIGHT : mPlayerPoint.y;
+
             mPlayer.update(mPlayerPoint);
             mObstacleManager.update();
 
@@ -68,6 +107,7 @@ public class GameplayScene implements Scene {
                 if(mGameOver && System.currentTimeMillis() - mGameOverTime >= 2000) {
                     reset();
                     mGameOver = false;
+                    mOrientationData.newGame();
                 }
                 break;
 
