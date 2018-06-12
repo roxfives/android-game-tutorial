@@ -18,6 +18,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         super(context);
 
         this.getHolder().addCallback(this);
+        Constants.CURRENT_CONTEXT = context;
         this.setFocusable(true);
 
         this.mManager = new SceneManager();
@@ -27,9 +28,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mThread = new MainThread(this.getHolder(), this);
-
         mThread.setRunning(true);
         mThread.start();
+
+        Constants.INIT_TIME = System.currentTimeMillis();
     }
 
     @Override
