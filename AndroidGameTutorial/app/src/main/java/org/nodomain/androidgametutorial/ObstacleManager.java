@@ -1,6 +1,8 @@
 package org.nodomain.androidgametutorial;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 
 import java.util.ArrayList;
 
@@ -12,6 +14,9 @@ public class ObstacleManager {
     private int mColor;
 
     private long mStartTime;
+    private long mInitTime;
+
+    private int mScore;
 
     public ObstacleManager(int playerGap, int obstacleGap, int obstacleHeight, int color) {
         this.mPlayerGap = playerGap;
@@ -21,6 +26,10 @@ public class ObstacleManager {
         this.mColor = color;
 
         this.mStartTime = System.currentTimeMillis();
+        this.mInitTime = System.currentTimeMillis();
+
+        this.mScore = 0;
+
         this.populateObstables();
     }
 
@@ -45,7 +54,7 @@ public class ObstacleManager {
         elapsedTime = (int) (System.currentTimeMillis() - mStartTime);
         mStartTime = System.currentTimeMillis();
 
-        speed = Constants.SCREEN_HEIGHT/10000.0f;
+        speed = (float) (1.0 + ((Math.sqrt(mStartTime-mInitTime) / 1000.0) * Constants.SCREEN_HEIGHT/10000.0f));
         for(Obstacle obst: mObstacles) {
             obst.incrementY(speed*elapsedTime);
         }
@@ -60,14 +69,22 @@ public class ObstacleManager {
                     mObstacles.get(0).getRectangle().top - mObstacleHeight - mObstacleGap,
                     mPlayerGap));
             mObstacles.remove(mObstacles.size() - 1);
-        }
 
+            mScore++;
+        }
     }
 
     public void draw(Canvas canvas) {
+        Paint paint;
+
         for(Obstacle obst: mObstacles) {
             obst.draw(canvas);
         }
+
+        paint = new Paint();
+        paint.setTextSize(100);
+        paint.setColor(Color.MAGENTA);
+        canvas.drawText("Score: " + mScore, 50, 50+paint.descent(), paint);
     }
 
     public boolean playerCollide(RectPlayer rectPlayer) {
