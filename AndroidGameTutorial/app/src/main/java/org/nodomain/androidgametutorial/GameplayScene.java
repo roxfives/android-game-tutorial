@@ -51,7 +51,7 @@ public class GameplayScene implements Scene {
             if(mOrientationData.getOrientation() != null
                     ) {
 
-                xSpeed = mOrientationData.getOrientation()[0]/10 * Constants.SCREEN_WIDTH/1000f;
+                xSpeed = mOrientationData.getOrientation()[0]/5 * Constants.SCREEN_WIDTH/1000f;
 
                 mPlayerPoint.x -= (Math.abs(xSpeed * elapsedTime) > 5)? xSpeed * elapsedTime : 0;
             }
