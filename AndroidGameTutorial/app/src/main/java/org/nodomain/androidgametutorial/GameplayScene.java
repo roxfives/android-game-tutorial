@@ -38,10 +38,7 @@ public class GameplayScene implements Scene {
     @Override
     public void update() {
         int elapsedTime;
-        float pitch;
-        float roll;
         float xSpeed;
-        float ySpeed;
 
         if(!mGameOver) {
             if(mFrameTime < Constants.INIT_TIME) {
@@ -52,22 +49,15 @@ public class GameplayScene implements Scene {
             mFrameTime = System.currentTimeMillis();
 
             if(mOrientationData.getOrientation() != null
-                    && mOrientationData.getStartOrientation() != null) {
-                pitch = mOrientationData.getOrientation()[1] - mOrientationData.getStartOrientation()[2];
-                roll = mOrientationData.getOrientation()[2] - mOrientationData.getStartOrientation()[1];
+                    ) {
 
-                xSpeed = 2 * roll * Constants.SCREEN_WIDTH/1000f;
-                ySpeed = pitch * Constants.SCREEN_HEIGHT/1000f;
+                xSpeed = mOrientationData.getOrientation()[0]/10 * Constants.SCREEN_WIDTH/1000f;
 
-                mPlayerPoint.x += (Math.abs(xSpeed * elapsedTime) > 5)? xSpeed * elapsedTime : 0;
-                mPlayerPoint.y -= (Math.abs(ySpeed * elapsedTime) > 5)? ySpeed * elapsedTime : 0;
+                mPlayerPoint.x -= (Math.abs(xSpeed * elapsedTime) > 5)? xSpeed * elapsedTime : 0;
             }
 
             mPlayerPoint.x = (mPlayerPoint.x < 0)? 0 : mPlayerPoint.x;
             mPlayerPoint.x = (mPlayerPoint.x > Constants.SCREEN_WIDTH)? Constants.SCREEN_WIDTH : mPlayerPoint.x;
-
-            mPlayerPoint.y = (mPlayerPoint.y < 0)? 0 : mPlayerPoint.y;
-            mPlayerPoint.y = (mPlayerPoint.y > Constants.SCREEN_HEIGHT)? Constants.SCREEN_HEIGHT : mPlayerPoint.y;
 
             mPlayer.update(mPlayerPoint);
             mObstacleManager.update();
@@ -100,25 +90,11 @@ public class GameplayScene implements Scene {
     public void receiveTouch(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if(!mGameOver && mPlayer.getRectangle().contains((int) event.getX(), (int) event.getY())) {
-                    mMovingPlayer = true;
-                }
-
                 if(mGameOver && System.currentTimeMillis() - mGameOverTime >= 2000) {
                     reset();
                     mGameOver = false;
                     mOrientationData.newGame();
                 }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                if(!mGameOver && mMovingPlayer) {
-                    mPlayerPoint.set((int) event.getX(), (int) event.getY());
-                }
-                break;
-
-            case MotionEvent.ACTION_UP:
-                mMovingPlayer = false;
                 break;
         }
 
